@@ -1,3 +1,5 @@
+import os
+import sys
 import pygame
 from pygame.locals import *
 from pygame.font import *
@@ -29,13 +31,23 @@ clock = pygame.time.Clock()
 running = True
 sweeping = False
 
+def create_path(relative_path: str) -> str:
+    """Create and return the path to the resource depending on whether this is
+       a PyInstaller exe or being run in the development environment."""
+    path: str
+    if hasattr(sys, '_MEIPASS'):
+        path = os.path.join(sys._MEIPASS, relative_path)
+    else:
+        path = os.path.join(os.path.abspath("."), relative_path)
+    return path
+
 def get_image(sheet, frame, row, width, height, scale, colorkey):
     image = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
     image.blit(sheet, (0, 0), (frame * width, row * height, width, height))
     image = pygame.transform.scale(image, (width * scale, height * scale))
     image.set_colorkey(colorkey)
     return image
-spritesheet = pygame.image.load("MinesweeperSheet.jpg") # 512 x 384
+spritesheet = pygame.image.load(create_path("MinesweeperSheet.jpg")) # 512 x 384
 
 hiddenTile = get_image(spritesheet, 0, 0, 128, 128, tileScale, (0, 0, 0))
 flaggedTile = get_image(spritesheet, 1, 0, 128, 128, tileScale, (0, 0, 0))
@@ -143,7 +155,7 @@ class cell:
 
 class board:
 
-    def createBoard(width, length, minecount): ### functionally perfect
+    def createBoard(width, length, minecount):
         global gameBoard
         gameBoard = np.ones(length*width)
         for i in range(length*width):
@@ -152,8 +164,9 @@ class board:
             gameBoard[i] = 19
         random.shuffle(gameBoard)
         gameBoard = gameBoard.reshape(length,width)
+        # print(gameBoard)
 
-    def renderBoard(): ### functionally perfect
+    def renderBoard():
         global gameBoard
         county = 0
         for y in gameBoard:
@@ -169,7 +182,7 @@ class board:
                 countx += 1
             county += 1
 
-    def assignCorrectBoardValues(): ### functionally perfect
+    def assignCorrectBoardValues():
         global gameBoard
         original = gameBoard.copy()
         rows, cols = original.shape

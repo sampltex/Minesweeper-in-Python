@@ -16,8 +16,6 @@ tileScale = 0.25
 cellSize = tileScale * 128
 global gameBoard
 gameBoard = np.zeros((0, 0))
-global win
-win = False
 
 screenHeight = boardLength*cellSize # 288 for 9x9
 screenWidth = boardWidth*cellSize # 288 for 9x9
@@ -154,7 +152,6 @@ class board:
             gameBoard[i] = 19
         random.shuffle(gameBoard)
         gameBoard = gameBoard.reshape(length,width)
-        print(gameBoard)
 
     def renderBoard(): ### functionally perfect
         global gameBoard
@@ -349,10 +346,6 @@ while running:
                     screen = pygame.display.set_mode((screenWidth, screenHeight))
                     menu.centerWindow()
                     sweeping = False
-                    
-            if win:
-                print('winner')
-                win =  False
             
             board.renderBoard()
             pygame.display.update()

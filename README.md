@@ -19,7 +19,7 @@ Modules used include Pygame, NumPy, and pygetwindow.
 
 - Press left click to reveal a tile.
 - Press right click to place a flag on a tile.
-- Pressing left and right click on a tile that has the correct amount of flags around it to reveal all tiles around it.
+- Press left and right click on a tile that has the correct amount of flags around it to reveal all tiles around it.
 - Press spacebar to reveal the board.
 - Press escape to go back to the menu.
 ## License

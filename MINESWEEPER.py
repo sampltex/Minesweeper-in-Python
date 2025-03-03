@@ -16,8 +16,13 @@ numberOfMines = 0
 
 tileScale = 0.25
 cellSize = tileScale * 128
-global gameBoard
+global gameBoard   
 gameBoard = np.zeros((0, 0))
+# global win
+win = False
+firstClick = True
+minesAround = 0
+# if islands, winning, or counting breaks check these because i removed global from them
 
 screenHeight = boardLength*cellSize # 288 for 9x9
 screenWidth = boardWidth*cellSize # 288 for 9x9
@@ -49,18 +54,18 @@ def get_image(sheet, frame, row, width, height, scale, colorkey):
     return image
 spritesheet = pygame.image.load(create_path("MinesweeperSheet.jpg")) # 512 x 384
 
-hiddenTile = get_image(spritesheet, 0, 0, 128, 128, tileScale, (0, 0, 0))
-flaggedTile = get_image(spritesheet, 1, 0, 128, 128, tileScale, (0, 0, 0))
-mineTile = get_image(spritesheet, 2, 0, 128, 128, tileScale, (0, 0, 0))
-blankTile = get_image(spritesheet, 3, 0, 128, 128, tileScale, (0, 0, 0))
-oneTile = get_image(spritesheet, 0, 1, 128, 128, tileScale, (0, 0, 0))
-twoTile = get_image(spritesheet, 1, 1, 128, 128, tileScale, (0, 0, 0))
-threeTile = get_image(spritesheet, 2, 1, 128, 128, tileScale, (0, 0, 0))
-fourTile = get_image(spritesheet, 3, 1, 128, 128, tileScale, (0, 0, 0))
-fiveTile = get_image(spritesheet, 0, 2, 128, 128, tileScale, (0, 0, 0))
-sixTile = get_image(spritesheet, 1, 2, 128, 128, tileScale, (0, 0, 0))
-sevenTile = get_image(spritesheet, 2, 2, 128, 128, tileScale, (0, 0, 0))
-eightTile = get_image(spritesheet, 3, 2, 128, 128, tileScale, (0, 0, 0))
+hiddenTile = get_image(spritesheet, 0, 0, 128, 128, tileScale, (1, 1, 1))
+flaggedTile = get_image(spritesheet, 1, 0, 128, 128, tileScale, (1, 1, 1))
+mineTile = get_image(spritesheet, 2, 0, 128, 128, tileScale, (1, 1, 1))
+blankTile = get_image(spritesheet, 3, 0, 128, 128, tileScale, (1, 1, 1))
+oneTile = get_image(spritesheet, 0, 1, 128, 128, tileScale, (1, 1, 1))
+twoTile = get_image(spritesheet, 1, 1, 128, 128, tileScale, (1, 1, 1))
+threeTile = get_image(spritesheet, 2, 1, 128, 128, tileScale, (1, 1, 1))
+fourTile = get_image(spritesheet, 3, 1, 128, 128, tileScale, (1, 1, 1))
+fiveTile = get_image(spritesheet, 0, 2, 128, 128, tileScale, (1, 1, 1))
+sixTile = get_image(spritesheet, 1, 2, 128, 128, tileScale, (1, 1, 1))
+sevenTile = get_image(spritesheet, 2, 2, 128, 128, tileScale, (1, 1, 1))
+eightTile = get_image(spritesheet, 3, 2, 128, 128, tileScale, (1, 1, 1))
 # screen.blit(hiddenTile, (100, 100)) the tuple is the location
 
 pygame.display.set_caption('Minesweeper')
@@ -153,6 +158,21 @@ class cell:
                     if int(gameBoard[int(ny)][int(nx)]/10) == 1:
                         gameBoard[int(ny)][int(nx)] += 20
 
+    def makeIsland(x, y):
+        global gameBoard, minesAround
+        original = gameBoard.copy()
+        rows, cols = original.shape
+        minesAround = 0
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                ny = y + dy-1
+                nx = x + dx-1
+                if 0 <= ny < rows and 0 <= nx < cols:
+                    if original[int(ny)][int(nx)] == 29 or original[int(ny)][int(nx)] == 19 or original[int(ny)][int(nx)] == 39:
+                        gameBoard[int(ny)][int(nx)] = 10
+                        minesAround += 1
+        board.assignCorrectBoardValues()
+
 class board:
 
     def createBoard(width, length, minecount):
@@ -211,12 +231,13 @@ class board:
                     gameBoard[y][x] += 20
 
     def checkForLoss():
-        global gameBoard
+        global gameBoard, firstClick
         rows, cols = gameBoard.shape
         for y in range(rows):
             for x in range(cols):
                 if gameBoard[y][x] == 39:
                     pygame.time.wait(1000)
+                    firstClick = True
                     board.createBoard(boardWidth, boardLength, numberOfMines)
                     board.assignCorrectBoardValues()
 
@@ -228,7 +249,7 @@ class board:
             for x in range(cols):
                 if gameBoard[y][x] // 10 == 3 and gameBoard[y][x] != 39:
                     shownTiles += 1
-        if shownTiles == (boardLength * boardWidth) - numberOfMines:
+        if shownTiles == (boardLength * boardWidth) - (numberOfMines - minesAround):
             global win
             win = True
     
@@ -244,6 +265,7 @@ class board:
                 elif int(gameBoard[y][x]/10) == 2 and gameBoard[y][x] != 29:
                     gameBoard[y][x] += 10
 
+
 base1 = Rect((133,228), (130,70))
 base2 = Rect((361,228), (285,70))
 base3 = Rect((734,228), (167,70))
@@ -257,8 +279,8 @@ buttonCorner = get_image(spritesheet, 7, 0, 16, 16, 0.5, (0, 0, 0))
 textButton1 = textFont.render('Easy', False, (0, 200, 0))
 textButton2 = textFont.render('Intermediate', False, (255, 255, 0))
 textButton3 = textFont.render('Expert', False, (255, 0, 0))
-hiddenTextFont = pygame.font.SysFont("🎉🎉🎉", 20)
-textButton4 = hiddenTextFont.render('Challenge?', False, (10, 10, 10))
+altTextFont = pygame.font.SysFont("🎉🎉🎉", 20)
+textButton4 = altTextFont.render('Challenge?', False, (10, 10, 10))
 
 class menu:
 
@@ -291,7 +313,7 @@ class menu:
         window.moveTo(int(1920//2-screenWidth//2), int(1080//2-screenHeight//2))
 
     def preLoadBoardSettings(boardWidthF, boardLengthF, numberOfMinesF):
-        global boardWidth, boardLength, numberOfMines, sweeping, screenHeight, screenWidth
+        global boardWidth, boardLength, numberOfMines, sweeping, screenHeight, screenWidth, firstClick
         boardWidth = boardWidthF
         boardLength = boardLengthF
         numberOfMines = numberOfMinesF
@@ -300,9 +322,11 @@ class menu:
         screen = pygame.display.set_mode((screenWidth, screenHeight))
         board.createBoard(boardWidthF, boardLengthF, numberOfMinesF)
         board.assignCorrectBoardValues()
+        firstClick = True
         sweeping = True
         menu.centerWindow()
         pygame.time.wait(500)
+        # print(gameBoard)
 
     def checkPressedButtons(XPos, YPos):
         if (XPos >= 125 and XPos <= 270) and (YPos >= 220 and YPos <= 305):
@@ -320,10 +344,6 @@ def calcMouseCellPos():
     mouseYPos = math.ceil(mouseYPos / cellSize) * cellSize
     return (mouseXPos,mouseYPos)
 
-# board.createBoard(boardWidth, boardLength, numberOfMines)
-# board.assignCorrectBoardValues()
-# print(gameBoard)
-
 while running:
     screen.fill("black")
     for event in pygame.event.get():
@@ -340,7 +360,10 @@ while running:
                                 if dx == 0 and dy == 0:
                                     continue
                                 cell.revealAroundBlankTile(((calcMouseCellPos()[0]/cellSize)-1)+dx,((calcMouseCellPos()[1]/cellSize)-1)+dy)
-                    else:
+                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # replace elif for else if you want to hold down m1 to reveal tiles
+                        if firstClick:
+                            cell.makeIsland(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
+                            firstClick = False
                         cell.revealCell(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
                         cell.revealAroundBlankTile((calcMouseCellPos()[0]/cellSize)-1,(calcMouseCellPos()[1]/cellSize)-1)
                 except:
@@ -349,7 +372,13 @@ while running:
                 cell.placeFlag(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    board.showBoard()
+                    if not win:
+                        board.showBoard()
+                    else:
+                        board.createBoard(boardWidth, boardLength, numberOfMines)
+                        board.assignCorrectBoardValues()
+                        firstClick = True
+                        win = False
                 if event.key == pygame.K_ESCAPE:
                     boardLength = 18
                     boardWidth = 32

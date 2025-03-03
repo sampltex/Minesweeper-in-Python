@@ -13,6 +13,7 @@ Modules used include Pygame, NumPy, and pygetwindow.
 
  - [README Creator](https://readme.so)
  - [Spritesheet Image](https://www.pinterest.com/pin/281686151670675581/)
+ - [PyInstaller](https://pyinstaller.org/en/stable/operating-mode.html)
 
 
 ## Controls
@@ -20,8 +21,13 @@ Modules used include Pygame, NumPy, and pygetwindow.
 - Press left click to reveal a tile.
 - Press right click to place a flag on a tile.
 - Press left and right click on a tile that has the correct amount of flags around it to reveal all tiles around it.
-- Press spacebar to reveal the board.
+- Press spacebar to reveal the board and generate a new one after finishing.
 - Press escape to go back to the menu.
+
+## Known Bugs
+
+- Generating a new board may fail, can be fixed by clicking and regenerating.
+- The first click may already be plotted when the game is started.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)

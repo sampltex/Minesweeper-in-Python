@@ -122,9 +122,8 @@ class cell:
                     nx = cx + dx
                     if 0 <= ny < rows and 0 <= nx < cols:
                         if gameBoard[int(ny)][int(nx)] // 10 == 1:
-                            under = gameBoard[int(ny)][int(nx)] % 10
-                            gameBoard[int(ny)][int(nx)] = 30 + under
-                            if under == 0:
+                            gameBoard[int(ny)][int(nx)] += 20
+                            if gameBoard[int(ny)][int(nx)] % 10 == 0:
                                 queue.append((ny, nx))
 
     def revealAroundRevealedTile(XPos, YPos):
@@ -218,7 +217,7 @@ class board:
                         ny = y + dy
                         nx = x + dx
                         if 0 <= ny < rows and 0 <= nx < cols:
-                            if original[ny][nx] == 29 or original[ny][nx] == 19 or original[y][x] == 39:
+                            if original[ny][nx] == 29 or original[ny][nx] == 19 or original[ny][nx] == 39:
                                 mine_count += 1
                 gameBoard[y][x] = 10 + mine_count
 
@@ -240,6 +239,7 @@ class board:
                     firstClick = True
                     board.createBoard(boardWidth, boardLength, numberOfMines)
                     board.assignCorrectBoardValues()
+                    break
 
     def checkForWin():
         global gameBoard
@@ -249,7 +249,7 @@ class board:
             for x in range(cols):
                 if gameBoard[y][x] // 10 == 3 and gameBoard[y][x] != 39:
                     shownTiles += 1
-        if shownTiles == (boardLength * boardWidth) - (numberOfMines - minesAround):
+        if shownTiles == (boardLength * boardWidth) - (numberOfMines): #- minesAround):
             global win
             win = True
     
@@ -265,6 +265,20 @@ class board:
                 elif int(gameBoard[y][x]/10) == 2 and gameBoard[y][x] != 29:
                     gameBoard[y][x] += 10
 
+    def fixMinesAfterClick():
+        global gameBoard, minesAround
+        rows, cols = gameBoard.shape
+        while minesAround > 0:
+            randomY = random.randint(0,rows-1)
+            randomX = random.randint(0,cols-1)
+            if gameBoard[randomY][randomX] % 10 != 9 and gameBoard[randomY][randomX]//10 != 3:
+                gameBoard[randomY][randomX] = 19
+            else:
+                minesAround += 1
+            minesAround -= 1
+        board.assignCorrectBoardValues()
+        cell.revealCell(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
+        cell.revealAroundBlankTile((calcMouseCellPos()[0]/cellSize)-1,(calcMouseCellPos()[1]/cellSize)-1)
 
 base1 = Rect((133,228), (130,70))
 base2 = Rect((361,228), (285,70))
@@ -325,8 +339,7 @@ class menu:
         firstClick = True
         sweeping = True
         menu.centerWindow()
-        pygame.time.wait(500)
-        # print(gameBoard)
+        print(gameBoard)
 
     def checkPressedButtons(XPos, YPos):
         if (XPos >= 125 and XPos <= 270) and (YPos >= 220 and YPos <= 305):
@@ -364,8 +377,13 @@ while running:
                         if firstClick:
                             cell.makeIsland(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
                             firstClick = False
-                        cell.revealCell(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
-                        cell.revealAroundBlankTile((calcMouseCellPos()[0]/cellSize)-1,(calcMouseCellPos()[1]/cellSize)-1)
+                            cell.revealCell(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
+                            cell.revealAroundBlankTile((calcMouseCellPos()[0]/cellSize)-1,(calcMouseCellPos()[1]/cellSize)-1)
+                            board.fixMinesAfterClick()
+                            print(gameBoard)
+                        else:
+                            cell.revealCell(calcMouseCellPos()[0]/cellSize,calcMouseCellPos()[1]/cellSize)
+                            cell.revealAroundBlankTile((calcMouseCellPos()[0]/cellSize)-1,(calcMouseCellPos()[1]/cellSize)-1)
                 except:
                         IndexError
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
@@ -374,6 +392,7 @@ while running:
                 if event.key == pygame.K_SPACE:
                     if not win:
                         board.showBoard()
+                        win = True
                     else:
                         board.createBoard(boardWidth, boardLength, numberOfMines)
                         board.assignCorrectBoardValues()
@@ -388,7 +407,7 @@ while running:
                     screen = pygame.display.set_mode((screenWidth, screenHeight))
                     menu.centerWindow()
                     sweeping = False
-            
+
             board.renderBoard()
             pygame.display.update()
             board.checkForLoss()

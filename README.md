@@ -25,6 +25,13 @@ Modules used include Pygame, NumPy, and pygetwindow.
 - Press escape to go back to the menu.
 
 
+## Features
+
+- Guaranteed islands on first click
+- Menu to choose from 3 difficulties (+1 hidden difficulty)
+- Chording
+
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)

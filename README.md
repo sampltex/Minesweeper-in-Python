@@ -24,10 +24,7 @@ Modules used include Pygame, NumPy, and pygetwindow.
 - Press spacebar to reveal the board and generate a new one after finishing.
 - Press escape to go back to the menu.
 
-## Known Bugs
 
-- Generating a new board may fail, can be fixed by clicking and regenerating.
-- The first click may already be plotted when the game is started.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
